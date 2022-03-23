@@ -5,6 +5,7 @@
  * This driver bridges standard type-c interfaces to drivers that
  * expect extcon interface.
  */
+#define DEBUG
 
 #include <linux/delay.h>
 #include <linux/kernel.h>
