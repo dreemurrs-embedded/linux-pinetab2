@@ -19,6 +19,10 @@
 #include <linux/usb/typec_mux.h>
 #include <linux/extcon-provider.h>
 
+static bool reset_on_mux;
+module_param(reset_on_mux, bool, S_IRUGO | S_IWUSR);
+MODULE_PARM_DESC(reset_on_mux, "Set DP=0 on each type-c mux change");
+
 struct typec_extcon {
         struct device *dev;
 
@@ -161,6 +165,17 @@ static int typec_extcon_mux_set(struct typec_mux_dev *mux,
 	if (alt)
 		dev_dbg(tce->dev, "      ...alt: svid=%04hx mode=%d vdo=%08x active=%u\n",
 			alt->svid, alt->mode, alt->vdo, alt->active);
+
+        mutex_lock(&tce->lock);
+	if (reset_on_mux && alt != NULL && tce->has_alt) {
+		tce->mode = state->mode;
+		tce->has_alt = false;
+		mutex_unlock(&tce->lock);
+
+		typec_extcon_sync_extcon(tce);
+	} else {
+		mutex_unlock(&tce->lock);
+	}
 
         mutex_lock(&tce->lock);
 	tce->mode = state->mode;
