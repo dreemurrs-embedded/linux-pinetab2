@@ -715,7 +715,7 @@ static int rk817_read_battery_nvram_values(struct rk817_charger *charger)
 	 * correct it.
 	 */
 	if ((charger->fcc_mah < 500) ||
-	   ((charger->fcc_mah * 1000) > charger->bat_charge_full_design_uah)) {
+	   (charger->fcc_mah > (charger->bat_charge_full_design_uah / 1000))) {
 		dev_info(charger->dev,
 			 "Invalid NVRAM max charge, setting to %u uAH\n",
 			 charger->bat_charge_full_design_uah);
