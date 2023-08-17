@@ -116,28 +116,25 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&hp_det_l>;
 		simple-audio-card,format = "i2s";
-		simple-audio-card,name = "PineTab2";
+		simple-audio-card,name = "rk817_ext";
 		simple-audio-card,mclk-fs = <256>;
 
 		simple-audio-card,widgets =
 			"Microphone", "Mic Jack",
 			"Headphone", "Headphones",
-			"Microphone", "Microphone",
-			"Speaker", "Speakers";
+			"Speaker", "Internal Speakers";
 
 		simple-audio-card,routing =
-			"MICL", "Microphone",
 			"MICR", "Mic Jack",
 			"Headphones", "HPOL",
 			"Headphones", "HPOR",
+			"Internal Speakers", "Speaker Amplifier OUTL",
+			"Internal Speakers", "Speaker Amplifier OUTR",
 			"Speaker Amplifier INL", "HPOL",
-			"Speaker Amplifier INR", "HPOR",
-			"Speakers", "Speaker Amplifier OUTL",
-			"Speakers", "Speaker Amplifier OUTR";
-
+			"Speaker Amplifier INR", "HPOR";
 		simple-audio-card,hp-det-gpio = <&gpio4 RK_PC6 GPIO_ACTIVE_LOW>;
 		simple-audio-card,aux-devs = <&speaker_amp>;
-		simple-audio-card,pin-switches = "Speakers", "Microphone";
+		simple-audio-card,pin-switches = "Internal Speakers";
 
 		simple-audio-card,cpu {
 			sound-dai = <&i2s1_8ch>;
