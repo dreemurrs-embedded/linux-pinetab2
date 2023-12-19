@@ -456,8 +456,6 @@
 			};
 
 			vdd_gpu_npu: DCDC_REG2 {
-				regulator-always-on;
-				regulator-boot-on;
 				regulator-min-microvolt = <500000>;
 				regulator-max-microvolt = <1350000>;
 				regulator-init-microvolt = <900000>;
