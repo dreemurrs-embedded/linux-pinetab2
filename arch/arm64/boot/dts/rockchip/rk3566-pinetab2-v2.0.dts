@@ -7,6 +7,16 @@
 / {
 	model = "Pine64 PineTab2 v2.0";
 	compatible = "pine64,pinetab2-v2.0", "pine64,pinetab2", "rockchip,rk3566";
+
+	sdio_pwrkey: sdio-pwrkey {
+		compatible = "mmc-pwrseq-simple";
+		clocks = <&rk817 1>;
+		clock-names = "ext_clock";
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_pwrkey>;
+		reset-gpios = <&gpio3 RK_PD3 GPIO_ACTIVE_HIGH>;
+		post-power-on-delay-ms = <500>;
+	};
 };
 
 &gpio_keys {
@@ -41,8 +51,14 @@
 			rockchip,pins = <0 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
+
+	wifi {
+		wifi_pwrkey: wifi-pwrkey {
+			rockchip,pins = <3 RK_PD3 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
 };
 
 &sdmmc1 {
-	vmmc-supply = <&vcc_sys>;
+	mmc-pwrseq = <&sdio_pwrseq &sdio_pwrkey>;
 };
