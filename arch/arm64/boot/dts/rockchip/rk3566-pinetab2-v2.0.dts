@@ -19,6 +19,14 @@
 	};
 };
 
+/*
+ * This GPIO is claimed by sdio_pwrkey, it's better to move the power/reset function
+ * to the bootloader instead so that the Linux can use it.
+ */
+//&bes2600 {
+//	power-gpios = <&gpio3 RK_PD3 GPIO_ACTIVE_HIGH>;
+//};
+
 &gpio_keys {
 	pinctrl-0 = <&kb_id_det>, <&hall_int_l>;
 
