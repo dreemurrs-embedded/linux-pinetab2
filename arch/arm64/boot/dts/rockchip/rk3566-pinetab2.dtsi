@@ -889,6 +889,28 @@
 	vmmc-supply = <&vcc_wl>;
 	vqmmc-supply = <&vcca1v8_pmu>;
 	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	bes2600: bes2600@0 {
+		compatible = "bestechnic,bes2600-sdio";
+		reg = <0>;
+
+		/*
+		 * The reset pin does not appear to be used in the latest driver drop by
+		 * Bestechnic. However, it is on the schematic but unfortunately wasn't
+		 * being used by Pine64.
+		 *
+		 * It doesn't hurt to configure it though, in case if they make use of
+		 * it in the near future.
+		 */
+		/* The reset pin is claimed by sdio_mmcseq, It's better to move it to U-Boot
+		 * so the OS can use it.
+		 */
+		//reset-gpios = <&gpio3 RK_PD2 GPIO_ACTIVE_LOW>;
+		wakeup-gpios = <&gpio0 RK_PB7 GPIO_ACTIVE_LOW>;
+		host-wakeup-gpios = <&gpio0 RK_PC4 GPIO_ACTIVE_HIGH>;
+	};
 };
 
 &sfc {
