@@ -216,6 +216,10 @@ static const struct ieee80211_iface_combination bes2600_if_comb[] = {
 
 
 static const struct ieee80211_ops bes2600_ops = {
+	.add_chanctx = ieee80211_emulate_add_chanctx,
+	.remove_chanctx = ieee80211_emulate_remove_chanctx,
+	.change_chanctx = ieee80211_emulate_change_chanctx,
+	.switch_vif_chanctx = ieee80211_emulate_switch_vif_chanctx,
 	.start			= bes2600_start,
 	.stop			= bes2600_stop,
 	.add_interface		= bes2600_add_interface,
