@@ -481,9 +481,9 @@ static int bes2600_set_txrx_opt_default_param(struct bes2600_common * hw_priv)
 	if (priv->join_status == BES2600_JOIN_STATUS_STA) {
 		sta = ieee80211_find_sta(priv->vif, priv->vif->bss_conf.bssid);
 		if (sta->deflink.ht_cap.ht_supported &&
-		    ((priv->vif->bss_conf.chandef.width == NL80211_CHAN_WIDTH_20 &&
+		    ((priv->vif->bss_conf.chanreq.oper.width == NL80211_CHAN_WIDTH_20 &&
 			 sta->deflink.ht_cap.cap & IEEE80211_HT_CAP_SGI_20) ||
-			(priv->vif->bss_conf.chandef.width == NL80211_CHAN_WIDTH_40 &&
+			(priv->vif->bss_conf.chanreq.oper.width == NL80211_CHAN_WIDTH_40 &&
 			 sta->deflink.ht_cap.cap & IEEE80211_HT_CAP_SGI_40))) {
 			bes_devel( "open short gi tx\n");
 			bes2600_enable_tx_shortgi(hw_priv, priv, 1);
