@@ -658,7 +658,7 @@ void bes2600_bss_info_changed(struct ieee80211_hw *dev,
 					bes2600_rate_mask_to_wsm(hw_priv,
 					sta->deflink.supp_rates[hw_priv->channel->band]));
 				rcu_read_unlock();
-				ch_type = cfg80211_get_chandef_type(&info->chandef);
+				ch_type = cfg80211_get_chandef_type(&info->chanreq.oper);
 				bes_devel("[STA] ch %d, type: %d, HT oper mode: %d\n",
 					  hw_priv->channel->hw_value,
 					  ch_type, info->ht_operation_mode);
@@ -969,7 +969,7 @@ void bes2600_bss_info_changed(struct ieee80211_hw *dev,
 	}
 
 	if (changed & BSS_CHANGED_BANDWIDTH) {
-		enum nl80211_channel_type ch_type = cfg80211_get_chandef_type(&info->chandef);
+		enum nl80211_channel_type ch_type = cfg80211_get_chandef_type(&info->chanreq.oper);
 
 		if (cfg->assoc &&
 		    hw_priv->ht_info.channel_type != ch_type &&
@@ -1548,7 +1548,7 @@ static int bes2600_start_ap(struct bes2600_vif *priv)
 	};
 
 	struct wsm_switch_channel channel = {
-		.channelMode = (cfg80211_get_chandef_type(&conf->chandef)) << 4,
+		.channelMode = (cfg80211_get_chandef_type(&conf->chanreq.oper)) << 4,
 		.channelSwitchCount = 0,
 		.newChannelNumber = hw_priv->channel->hw_value,
 	};
@@ -1560,7 +1560,7 @@ static int bes2600_start_ap(struct bes2600_vif *priv)
 
 	if (priv->vif->p2p) {
 		start_dhcpd();
-		hw_priv->ht_info.channel_type = cfg80211_get_chandef_type(&conf->chandef);
+		hw_priv->ht_info.channel_type = cfg80211_get_chandef_type(&conf->chanreq.oper);
 	}
 
 	if (priv->if_id)
