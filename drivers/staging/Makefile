@@ -13,4 +13,5 @@ obj-$(CONFIG_MOST)		+= most/
 obj-$(CONFIG_GREYBUS)		+= greybus/
 obj-$(CONFIG_BCM2835_VCHIQ)	+= vc04_services/
 obj-$(CONFIG_XIL_AXIS_FIFO)	+= axis-fifo/
+obj-$(CONFIG_BES2600)		+= bes2600/
 obj-$(CONFIG_GPIB)	 	+= gpib/
