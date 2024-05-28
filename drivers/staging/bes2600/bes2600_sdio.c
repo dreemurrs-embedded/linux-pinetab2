@@ -123,6 +123,7 @@ static const struct sdio_device_id bes2600_sdio_ids[] = {
 	{ SDIO_DEVICE(BES_VENDOR_ID, BES_DEVICE_ID_2002) },
 	{ /* end: all zeroes */			},
 };
+MODULE_DEVICE_TABLE(sdio, bes2600_sdio_ids);
 
 #ifdef BES2600_GPIO_WAKEUP_AP
 static int bes2600_gpio_wakeup_ap_config(struct sbus_priv *priv);
