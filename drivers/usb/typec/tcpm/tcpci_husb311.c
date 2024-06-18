@@ -157,19 +157,24 @@ static int husb311_probe(struct i2c_client *client)
 	}
 
 	chip = devm_kzalloc(&client->dev, sizeof(*chip), GFP_KERNEL);
-	if (!chip)
+	if (!chip) {
+		dev_err(&client->dev, "fail to allocate memory\n");
 		return -ENOMEM;
+	}
 
 	chip->data.regmap = devm_regmap_init_i2c(client,
 						 &husb311_regmap_config);
-	if (IS_ERR(chip->data.regmap))
+	if (IS_ERR(chip->data.regmap)) {
+		dev_err(&client->dev, "fail to get parent regmap\n");
 		return PTR_ERR(chip->data.regmap);
+	}
 
 	chip->dev = &client->dev;
 	i2c_set_clientdata(client, chip);
 
 	chip->vbus = devm_regulator_get_optional(chip->dev, "vbus");
 	if (IS_ERR(chip->vbus)) {
+		dev_err(chip->dev, "fail to get vbus\n");
 		ret = PTR_ERR(chip->vbus);
 		chip->vbus = NULL;
 		if (ret != -ENODEV)
@@ -186,14 +191,17 @@ static int husb311_probe(struct i2c_client *client)
 		chip->data.set_vbus = husb311_set_vbus;
 	chip->data.init = husb311_init;
 	chip->tcpci = tcpci_register_port(chip->dev, &chip->data);
-	if (IS_ERR(chip->tcpci))
+	if (IS_ERR(chip->tcpci)) {
+		dev_err(chip->dev, "fail to register tcpci port\n");
 		return PTR_ERR(chip->tcpci);
+	}
 
 	ret = devm_request_threaded_irq(chip->dev, client->irq, NULL,
 					husb311_irq,
 					IRQF_ONESHOT | IRQF_TRIGGER_LOW,
 					client->name, chip);
 	if (ret < 0) {
+		dev_err(chip->dev, "fail to register irq\n");
 		tcpci_unregister_port(chip->tcpci);
 		return ret;
 	}
