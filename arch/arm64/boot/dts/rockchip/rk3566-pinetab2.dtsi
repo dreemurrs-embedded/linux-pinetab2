@@ -154,6 +154,13 @@
 		VCC-supply = <&vcc_bat>;
 	};
 
+	typec_extcon_bridge: typec-extcon {
+		compatible = "linux,typec-extcon-bridge";
+		usb-role-switch;
+		orientation-switch;
+		mode-switch;
+	};
+
 	vcc_3v3: vcc-3v3-regulator {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc_3v3";
@@ -593,30 +600,25 @@
 		interrupts = <RK_PC5 IRQ_TYPE_LEVEL_LOW>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&usbcc_int_l>;
+		extcon = <&typec_extcon_bridge>;
+		usb-role-switch = <&typec_extcon_bridge>;
 		vbus-supply = <&vbus>;
-		usb-role-switch = <&usb_host0_xhci>;
-		extcon = <&usb2phy0>;
 
 		connector {
 			compatible = "usb-c-connector";
 			label = "USB-C";
 			data-role = "dual";
 			power-role = "dual";
-			try-power-role = "source";
+			try-power-role = "sink";
 			op-sink-microwatt = <2500000>;
 			sink-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)>;
 			source-pdos = <PDO_FIXED(5000, 500, PDO_FIXED_USB_COMM)>;
+			mode-switch = <&typec_extcon_bridge>;
+			orientation-switch = <&typec_extcon_bridge>;
 
-			ports {
-				#address-cells = <1>;
-				#size-cells = <0>;
-
-				port@0 {
-					reg = <0>;
-
-					typec_hs_usb_host0_xhci: endpoint {
-						remote-endpoint = <&usb_host0_xhci_typec_hs>;
-					};
+			port {
+				typec_hs_usb_host0_xhci: endpoint {
+					remote-endpoint = <&usb_host0_xhci_typec_hs>;
 				};
 			};
 		};
@@ -989,7 +991,7 @@
 
 /* OTG port controller */
 &usb_host0_xhci {
-	usb-role-switch;
+	extcon = <&typec_extcon_bridge>;
 	status = "okay";
 
 	port {
@@ -1004,6 +1006,7 @@
 };
 
 &usb2phy0 {
+	extcon = <&typec_extcon_bridge>;
 	status = "okay";
 };
 
