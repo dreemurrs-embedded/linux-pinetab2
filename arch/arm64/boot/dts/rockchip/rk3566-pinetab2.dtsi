@@ -13,6 +13,7 @@
 	chassis-type = "tablet";
 
 	aliases {
+		ethernet0 = &bes2600;
 		mmc0 = &sdhci;
 		mmc1 = &sdmmc0;
 	};
