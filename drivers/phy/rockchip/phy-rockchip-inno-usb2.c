@@ -1392,7 +1392,8 @@ static int rockchip_usb2phy_probe(struct platform_device *pdev)
 		}
 	}
 
-	if (of_device_is_compatible(np, "rockchip,rv1106-usb2phy")) {
+	if (of_device_is_compatible(np, "rockchip,rv1106-usb2phy") ||
+	    of_device_is_compatible(np, "rockchip,rk3568-usb2phy")) {
 		rphy->phy_base = devm_platform_get_and_ioremap_resource(pdev, 0, NULL);
 		if (IS_ERR(rphy->phy_base))
 			return dev_err_probe(dev, PTR_ERR(rphy->phy_base),
@@ -1577,6 +1578,45 @@ static int rk3128_usb2phy_tuning(struct rockchip_usb2phy *rphy)
 	return regmap_write_bits(rphy->grf, 0x298,
 				BIT(2) << BIT_WRITEABLE_SHIFT | BIT(2),
 				BIT(2) << BIT_WRITEABLE_SHIFT | 0);
+}
+
+static int rk3568_usb2phy_tuning(struct rockchip_usb2phy *rphy)
+{
+	int ret;
+
+	if(IS_ERR(rphy->phy_base))
+		return -EINVAL;
+
+	/* Turn off differential receiver by default to save power */
+	phy_clear_bits(rphy->phy_base + 0x30, BIT(2));
+
+	/* Enable otg port pre-emphasis during non-chirp phase */
+	phy_update_bits(rphy->phy_base, GENMASK(2, 0), 0x04);
+
+	/* Enable host port pre-emphasis during non-chirp phase */
+	phy_update_bits(rphy->phy_base + 0x0400, GENMASK(2, 0), 0x04);
+
+	if (rphy->phy_cfg->reg == 0xfe8a0000) {
+		/* Set otg port HS eye height to 437.5mv(default is 400mv) */
+		phy_update_bits(rphy->phy_base + 0x30, GENMASK(6, 4), (0x06 << 4));
+
+		/*
+		 * Set the bvalid filter time to 10ms
+		 * based on the usb2 phy grf pclk 100MHz.
+		 */
+		ret |= regmap_write(rphy->grf, 0x0048, 0xF4240);
+
+		/*
+		 * Set the id filter time to 10ms based
+		 * on the usb2 phy grf pclk 100MHz.
+		 */
+		ret |= regmap_write(rphy->grf, 0x004c, 0xF4240);
+	}
+
+	/* Enable host port (usb3 host1 and usb2 host1) wakeup irq */
+	ret |= regmap_write(rphy->grf, 0x000c, 0x80008000);
+
+	return ret;
 }
 
 static int rk3588_usb2phy_tuning(struct rockchip_usb2phy *rphy)
@@ -1941,6 +1981,7 @@ static const struct rockchip_usb2phy_cfg rk3568_phy_cfgs[] = {
 	{
 		.reg = 0xfe8a0000,
 		.num_ports	= 2,
+		.phy_tuning	= rk3568_usb2phy_tuning,
 		.clkout_ctl	= { 0x0008, 4, 4, 1, 0 },
 		.port_cfgs	= {
 			[USB2PHY_PORT_OTG] = {
@@ -1984,6 +2025,7 @@ static const struct rockchip_usb2phy_cfg rk3568_phy_cfgs[] = {
 	{
 		.reg = 0xfe8b0000,
 		.num_ports	= 2,
+		.phy_tuning	= rk3568_usb2phy_tuning,
 		.clkout_ctl	= { 0x0008, 4, 4, 1, 0 },
 		.port_cfgs	= {
 			[USB2PHY_PORT_OTG] = {
