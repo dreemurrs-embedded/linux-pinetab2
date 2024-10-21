@@ -16,7 +16,7 @@
 /* mac80211 API								*/
 
 int bes2600_start(struct ieee80211_hw *dev);
-void bes2600_stop(struct ieee80211_hw *dev);
+void bes2600_stop(struct ieee80211_hw *dev, bool suspend);
 int bes2600_add_interface(struct ieee80211_hw *dev,
 			 struct ieee80211_vif *vif);
 void bes2600_remove_interface(struct ieee80211_hw *dev,

@@ -194,7 +194,7 @@ out:
 	return ret;
 }
 
-void bes2600_stop(struct ieee80211_hw *dev)
+void bes2600_stop(struct ieee80211_hw *dev, bool suspend)
 {
 	struct bes2600_common *hw_priv = dev->priv;
 	struct bes2600_vif *priv = NULL;
