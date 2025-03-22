@@ -2,7 +2,6 @@ config BES2600
 	tristate "BES2600 WLAN support"
 	select MAC80211
 	select CFG80211
-	select NL80211_TESTMODE
 	default m
 	help
 		This is an experimental driver for the bes2600 chip-set.
