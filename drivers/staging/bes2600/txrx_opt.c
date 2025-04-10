@@ -455,7 +455,7 @@ static void txrx_opt_timer_start(struct bes2600_common *hw_priv)
 
 static void txrx_opt_timer_stop(struct bes2600_common *hw_priv)
 {
-	del_timer_sync(&hw_priv->txrx_opt_timer);
+	timer_delete_sync(&hw_priv->txrx_opt_timer);
 }
 
 static int bes2600_set_txrx_opt_default_param(struct bes2600_common * hw_priv)
@@ -550,7 +550,7 @@ void txrx_opt_timer_exit(struct bes2600_vif *priv)
 	bes_devel( "txrx_opt_timer_exit");
 
 	if (priv->if_id == 0) {
-		del_timer_sync(&hw_priv->txrx_opt_timer);
+		timer_delete_sync(&hw_priv->txrx_opt_timer);
 		cancel_work_sync(&hw_priv->dynamic_opt_txrx_work);
 		bes2600_pwr_unregister_en_lp_cb(hw_priv, txrx_opt_timer_stop);
 		bes2600_pwr_unregister_exit_lp_cb(hw_priv, txrx_opt_timer_start);

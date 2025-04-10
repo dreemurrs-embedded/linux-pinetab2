@@ -221,7 +221,7 @@ void bes2600_stop(struct ieee80211_hw *dev, bool suspend)
 	cancel_delayed_work_sync(&hw_priv->advance_scan_timeout);
 #endif
 	flush_workqueue(hw_priv->workqueue);
-	del_timer_sync(&hw_priv->ba_timer);
+	timer_delete_sync(&hw_priv->ba_timer);
 
 	down(&hw_priv->conf_lock);
 
@@ -261,7 +261,7 @@ void bes2600_stop(struct ieee80211_hw *dev, bool suspend)
 		cancel_delayed_work_sync(&priv->bss_loss_work);
 		cancel_delayed_work_sync(&priv->connection_loss_work);
 		cancel_delayed_work_sync(&priv->link_id_gc_work);
-		del_timer_sync(&priv->mcast_timeout);
+		timer_delete_sync(&priv->mcast_timeout);
 	}
 
 #ifdef WIFI_BT_COEXIST_EPTA_ENABLE
@@ -451,7 +451,7 @@ void bes2600_remove_interface(struct ieee80211_hw *dev,
 	cancel_delayed_work_sync(&priv->set_cts_work);
 	cancel_delayed_work_sync(&priv->pending_offchanneltx_work);
 
-	del_timer_sync(&priv->mcast_timeout);
+	timer_delete_sync(&priv->mcast_timeout);
 	/* TODO:COMBO: May be reset of these variables "delayed_link_loss and
 	 * join_status to default can be removed as dev_priv will be freed by
 	 * mac80211 */
@@ -2360,7 +2360,7 @@ void bes2600_unjoin_work(struct work_struct *work)
 	int i;
 	struct bes2600_vif *tmp_priv;
 
-	del_timer_sync(&hw_priv->ba_timer);
+	timer_delete_sync(&hw_priv->ba_timer);
 	down(&hw_priv->conf_lock);
 	if (unlikely(atomic_read(&hw_priv->scan.in_progress)
 		|| atomic_read(&priv->connect_in_process))) {

@@ -363,7 +363,7 @@ void bes2600_queue_deinit(struct bes2600_queue *queue)
 	int i;
 
 	bes2600_queue_clear(queue, CW12XX_ALL_IFS);
-	del_timer_sync(&queue->gc);
+	timer_delete_sync(&queue->gc);
 	INIT_LIST_HEAD(&queue->free_pool);
 	kfree(queue->pool);
 	for (i = 0; i < CW12XX_MAX_VIFS; i++) {
