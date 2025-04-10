@@ -1155,7 +1155,7 @@ void bes2600_multicast_stop_work(struct work_struct *work)
 		container_of(work, struct bes2600_vif, multicast_stop_work);
 
 	if (priv->aid0_bit_set) {
-		del_timer_sync(&priv->mcast_timeout);
+		timer_delete_sync(&priv->mcast_timeout);
 		wsm_lock_tx(priv->hw_priv);
 		priv->aid0_bit_set = false;
 		bes2600_set_tim_impl(priv, false);
@@ -1239,7 +1239,7 @@ void bes2600_suspend_resume(struct bes2600_vif *priv,
 		}
 		spin_unlock_bh(&priv->ps_state_lock);
 		if (cancel_tmo)
-			del_timer_sync(&priv->mcast_timeout);
+			timer_delete_sync(&priv->mcast_timeout);
 	} else {
 		spin_lock_bh(&priv->ps_state_lock);
 		bes2600_ps_notify(priv, arg->link_id, arg->stop);

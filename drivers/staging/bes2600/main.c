@@ -594,7 +594,7 @@ static void bes2600_unregister_common(struct ieee80211_hw *dev)
 
 	ieee80211_unregister_hw(dev);
 
-	del_timer_sync(&hw_priv->ba_timer);
+	timer_delete_sync(&hw_priv->ba_timer);
 
 	hw_priv->sbus_ops->irq_unsubscribe(hw_priv->sbus_priv);
 	bes2600_unregister_bh(hw_priv);
@@ -897,8 +897,8 @@ int bes2600_wifi_stop(struct bes2600_common *hw_priv)
 	hw_priv->wsm_tx_seq[1] = 0;
 	hw_priv->wsm_tx_pending[0] = 0;
 	hw_priv->wsm_tx_pending[1] = 0;
-	del_timer_sync(&hw_priv->mcu_mon_timer);
-	del_timer_sync(&hw_priv->lmac_mon_timer);
+	timer_delete_sync(&hw_priv->mcu_mon_timer);
+	timer_delete_sync(&hw_priv->lmac_mon_timer);
 #ifdef CONFIG_BES2600_STATIC_SDD
 	hw_priv->sdd = NULL;
 #else
