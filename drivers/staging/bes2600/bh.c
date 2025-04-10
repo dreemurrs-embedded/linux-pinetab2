@@ -1311,7 +1311,7 @@ void bes2600_bh_dec_pending_count(struct bes2600_common *hw_priv, int idx)
 	}
 
 	if (--hw_priv->wsm_tx_pending[idx] == 0)
-		del_timer_sync(timer);
+		timer_delete_sync(timer);
 	else
 		mod_timer(timer, jiffies + 3 * HZ);
 }
