@@ -155,33 +155,36 @@ void bes2600_tx_status(struct bes2600_vif *priv, struct sk_buff *skb)
 {
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *) skb->data;
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
-	__le16 fc;
 	int i;
 	int retry_count = -1;
-	fc = hdr->frame_control;
 
-	if (ieee80211_is_data(fc)) {
-		for (i = 0; i < IEEE80211_TX_MAX_RATES; i++) {
-			if (info->status.rates[i].idx < 0) {
-				break;
-			}
-			retry_count += info->status.rates[i].count;
-		}
-		if (retry_count < 0)
-			retry_count = 0;
+	if(WARN_ON(!priv->hw))
+		return;
 
-		if (info->flags & IEEE80211_TX_STAT_ACK) {
-			priv->dot11TransmittedFrameCount++;
-			priv->dot11TransmittedDataBytes += (skb->len + 4);
-			if (retry_count > 0)
-				priv->dot11RetryCount += retry_count;
+	if (!ieee80211_is_data(hdr->frame_control))
+		return;
 
-		} else {
-			/* tx fail.*/
-			priv->dot11FailedCount++;
-		}
+	for (i = 0; i < IEEE80211_TX_MAX_RATES; i++) {
+		if (info->status.rates[i].idx < 0)
+			break;
+
+		retry_count += info->status.rates[i].count;
+	}
+	if (retry_count < 0)
+		retry_count = 0;
+
+	if (info->flags & IEEE80211_TX_STAT_ACK) {
+		priv->dot11TransmittedFrameCount++;
+		priv->dot11TransmittedDataBytes += (skb->len + 4);
+		if (retry_count > 0)
+			priv->dot11RetryCount += retry_count;
+
+	} else {
+		/* tx fail.*/
+		priv->dot11FailedCount++;
 	}
 
+	ieee80211_tx_status_skb(priv->hw, skb);
 }
 void bes2600_set_default_params(struct bes2600_common *hw_priv, struct bes2600_vif *priv);
 
@@ -458,14 +461,15 @@ static void txrx_opt_timer_stop(struct bes2600_common *hw_priv)
 	timer_delete_sync(&hw_priv->txrx_opt_timer);
 }
 
-static int bes2600_set_txrx_opt_default_param(struct bes2600_common * hw_priv)
+static void bes2600_set_txrx_opt_default_param(struct bes2600_common * hw_priv)
 {
 	MIB_TXRX_OPT_PARAM g_txrx_param = {2, (PROCTECT_MODE_RTS_CTS | PROCTECT_MODE_RTS_CTS_RETRY), 3000};
 	struct bes2600_vif *priv = __cw12xx_hwpriv_to_vifpriv(hw_priv, 0);
 	struct ieee80211_sta *sta = NULL;
+	int shortgi = 0;
 
 	if (priv == NULL)
-		return 0;
+		return;
 
 	/* reset states */
 	cur_pwr_tbl = 1;
@@ -479,21 +483,24 @@ static int bes2600_set_txrx_opt_default_param(struct bes2600_common * hw_priv)
 	bes2600_update_pwr_table(hw_priv, priv, cur_pwr_tbl);	// use standard pwr table
 
 	if (priv->join_status == BES2600_JOIN_STATUS_STA) {
-		sta = ieee80211_find_sta(priv->vif, priv->vif->bss_conf.bssid);
-		if (sta->deflink.ht_cap.ht_supported &&
-		    ((priv->vif->bss_conf.chanreq.oper.width == NL80211_CHAN_WIDTH_20 &&
-			 sta->deflink.ht_cap.cap & IEEE80211_HT_CAP_SGI_20) ||
-			(priv->vif->bss_conf.chanreq.oper.width == NL80211_CHAN_WIDTH_40 &&
-			 sta->deflink.ht_cap.cap & IEEE80211_HT_CAP_SGI_40))) {
-			bes_devel( "open short gi tx\n");
-			bes2600_enable_tx_shortgi(hw_priv, priv, 1);
-		} else {
-			bes_devel( "close short gi tx\n");
-			bes2600_enable_tx_shortgi(hw_priv, priv, 0);
-		}
-	}
+		rcu_read_lock();
 
-	return 0;
+		sta = ieee80211_find_sta(priv->vif, priv->vif->bss_conf.bssid);
+		if (sta) {
+			if (sta->deflink.ht_cap.ht_supported &&
+			    ((priv->vif->bss_conf.chanreq.oper.width == NL80211_CHAN_WIDTH_20 &&
+				 sta->deflink.ht_cap.cap & IEEE80211_HT_CAP_SGI_20) ||
+				(priv->vif->bss_conf.chanreq.oper.width == NL80211_CHAN_WIDTH_40 &&
+				 sta->deflink.ht_cap.cap & IEEE80211_HT_CAP_SGI_40))) {
+				shortgi = 1;
+			}
+		}
+
+		rcu_read_unlock();
+
+		bes_devel("short gi tx status: %d\n", shortgi);
+		bes2600_enable_tx_shortgi(hw_priv, priv, shortgi);
+	}
 }
 
 static int bes2600_set_txrx_opt_unjoin_param(struct bes2600_common * hw_priv)
