@@ -1474,6 +1474,22 @@ void bes2600_skb_dtor(struct bes2600_common *hw_priv,
 	struct bes2600_vif *priv =
 		__cw12xx_hwpriv_to_vifpriv(hw_priv, txpriv->if_id);
 
+
+	if (!skb)
+		return;
+
+	/*
+	 * There should be no reason for skb buffer being larger
+	 * than the offset..
+	 */
+	if(WARN_ON(txpriv->offset > skb->len)) {
+		ieee80211_free_txskb(hw_priv->hw, skb);
+		return;
+	}
+
+	bes_devel("%s: txpriv->offset: %d - skb->len: %d\n",
+		  __func__, txpriv->offset, skb->len);
+
 	skb_pull(skb, txpriv->offset);
 	if (priv && txpriv->rate_id != BES2600_INVALID_RATE_ID) {
 		bes2600_notify_buffered_tx(priv, skb,

@@ -377,9 +377,23 @@ void bes2600_remove_interface(struct ieee80211_hw *dev,
 	atomic_set(&priv->enabled, 0);
 	down(&hw_priv->scan.lock);
 	down(&hw_priv->conf_lock);
-	if (!__cw12xx_hwpriv_to_vifpriv(hw_priv, priv->if_id)) {
+
+	/*
+	 * There's a chance remove_interface will run again on the same
+	 * (already removed) interface.
+	 *
+	 * Currently this only happens when NetworkManager creates a P2P_DEVICE
+	 * alongside a STA.
+	 *
+	 * But there can be other cases where this may run as well. So if that
+	 * happens, let's throw a warning and decrease the vifs count by one.
+	 */
+	if (WARN_ON(!__cw12xx_hwpriv_to_vifpriv(hw_priv, priv->if_id))) {
 		bes_devel(" !!! %s: interface addr %pM already removed\n",
 			     __func__, vif->addr);
+
+		atomic_dec(&hw_priv->num_vifs);
+
 	        up(&hw_priv->conf_lock);
 	        up(&hw_priv->scan.lock);
 		return;
@@ -2171,6 +2185,8 @@ void bes2600_join_work(struct work_struct *work)
 		wsm_unlock_tx(hw_priv);
 		return;
 	}
+
+	rcu_read_lock();
 	ssidie = ieee80211_bss_get_ie(bss, WLAN_EID_SSID);
 	dtimie = ieee80211_bss_get_ie(bss, WLAN_EID_TIM);
 	if (dtimie)
@@ -2253,6 +2269,8 @@ void bes2600_join_work(struct work_struct *work)
 			join.basicRateSet =
 				bes2600_rate_mask_to_wsm(hw_priv, 0xFF0);
 		}
+
+		rcu_read_unlock();
 
 		bes2600_pwr_set_busy_event(hw_priv, BES_PWR_LOCK_ON_JOIN);
 		wsm_flush_tx(hw_priv);

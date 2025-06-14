@@ -621,8 +621,9 @@ void bes2600_scan_work(struct work_struct *work)
 			scan.scanType = WSM_SCAN_TYPE_BACKGROUND;
 			scan.scanFlags = WSM_SCAN_FLAG_FORCE_BACKGROUND;
 		}
-		scan.ch = kzalloc((it - hw_priv->scan.curr) *
-			sizeof(struct wsm_scan_ch), GFP_KERNEL);
+		scan.ch = kcalloc((it - hw_priv->scan.curr),
+				   sizeof(struct wsm_scan_ch),
+				   GFP_KERNEL);
 		if (!scan.ch) {
 			hw_priv->scan.status = -ENOMEM;
 			goto fail;

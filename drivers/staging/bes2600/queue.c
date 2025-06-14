@@ -119,10 +119,9 @@ static void bes2600_queue_register_post_gc(struct list_head *gc_list,
 				     struct bes2600_queue_item *item)
 {
 	struct bes2600_queue_item *gc_item;
-	gc_item = kmalloc(sizeof(struct bes2600_queue_item),
+	gc_item = kmemdup(item, sizeof(struct bes2600_queue_item),
 			GFP_ATOMIC);
 	BUG_ON(!gc_item);
-	memcpy(gc_item, item, sizeof(struct bes2600_queue_item));
 	list_add_tail(&gc_item->head, gc_list);
 }
 
@@ -131,9 +130,9 @@ static void bes2600_queue_pending_record(struct list_head *pending_record_list,
 {
 	struct bes2600_queue_item *record_item;
 
-	record_item = kmalloc(sizeof(struct bes2600_queue_item),GFP_ATOMIC);
+	record_item = kmemdup(pending_item, sizeof(struct bes2600_queue_item),
+			GFP_ATOMIC);
 	BUG_ON(!record_item);
-	memcpy(record_item, pending_item, sizeof(struct bes2600_queue_item));
 	record_item->skb = skb_clone(pending_item->skb, GFP_ATOMIC);
 	list_add_tail(&record_item->head, pending_record_list);
 }
@@ -218,7 +217,7 @@ int bes2600_queue_stats_init(struct bes2600_queue_stats *stats,
 	spin_lock_init(&stats->lock);
 	init_waitqueue_head(&stats->wait_link_id_empty);
 	for (i = 0; i < CW12XX_MAX_VIFS; i++) {
-		stats->link_map_cache[i] = kzalloc(map_capacity * sizeof(int),
+		stats->link_map_cache[i] = kcalloc(map_capacity, sizeof(int),
 			GFP_KERNEL);
 		if (!stats->link_map_cache[i]) {
 			for (; i >= 0; i--)
@@ -249,14 +248,14 @@ int bes2600_queue_init(struct bes2600_queue *queue,
 	queue->queue_all_lock = false;
 	spin_lock_init(&queue->lock);
 	timer_setup(&queue->gc, bes2600_queue_gc, 0);
-	queue->pool = kzalloc(sizeof(struct bes2600_queue_item) * capacity,
+	queue->pool = kcalloc(capacity, sizeof(struct bes2600_queue_item),
 			GFP_KERNEL);
 	if (!queue->pool)
 		return -ENOMEM;
 
 	for (i = 0; i < CW12XX_MAX_VIFS; i++) {
 		queue->link_map_cache[i] =
-				kzalloc(stats->map_capacity * sizeof(int),
+				kcalloc(stats->map_capacity, sizeof(int),
 			GFP_KERNEL);
 		if (!queue->link_map_cache[i]) {
 			for (; i >= 0; i--)
@@ -410,7 +409,6 @@ int bes2600_queue_put(struct bes2600_queue *queue,
 	struct timespec64 tmval;
 #endif /*CONFIG_BES2600_TESTMODE*/
 
-	LIST_HEAD(gc_list);
 	struct bes2600_queue_stats *stats = queue->stats;
 	/* TODO:COMBO: Add interface ID info to queue item */
 

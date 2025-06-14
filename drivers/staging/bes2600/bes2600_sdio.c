@@ -1913,8 +1913,8 @@ int bes2600_unregister_net_dev(struct sbus_priv *bus_priv)
 	BUG_ON(!bus_priv);
 	if (bus_priv->core && !bus_priv->unregister_in_process) {
 		bus_priv->unregister_in_process = true;
-		bes2600_core_release(bus_priv->core);
 		bes2600_pwr_unregister_en_lp_cb(bus_priv->core, bes2600_sdio_en_lp_cb);
+		bes2600_core_release(bus_priv->core);
 		bus_priv->core = NULL;
 
 		if (bus_priv->sdio_wq) {
