@@ -199,7 +199,11 @@ static const struct ieee80211_iface_limit bes2600_if_limits[] = {
 			     BIT(NL80211_IFTYPE_P2P_CLIENT) |
 			     BIT(NL80211_IFTYPE_P2P_GO) },
 #ifdef P2P_MULTIVIF
-	{ .max = 1, .types = BIT(NL80211_IFTYPE_P2P_DEVICE) },
+	/*
+	 * HACK: Disable P2P_DEVICE implementation for BES2600
+	 *       as the code is a little buggy.
+	 */
+	//{ .max = 1, .types = BIT(NL80211_IFTYPE_P2P_DEVICE) },
 #endif
 };
 
